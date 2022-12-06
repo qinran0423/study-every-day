@@ -12,12 +12,12 @@ class Scheduler {
     }
 
     this.count++
-    let res = await promiseCreator()
+    await promiseCreator()
     this.count--
     if (this.queue.length) {
       this.queue.shift()()
     }
-    return res
+    // return res
   }
 }
 
