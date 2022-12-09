@@ -103,10 +103,13 @@ class MyPromise {
 }
 
 const test1 = new MyPromise((resolve, reject) => {
-  setTimeout(() => {
-    resolve("success")
-  }, 1000)
-}).then(
-  (res) => console.log(res),
-  (err) => console.log(err)
-)
+  resolve("success")
+})
+  .then(
+    (res) => console.log(res),
+    (err) => console.log(err)
+  )
+  .then(
+    (res) => console.log(res),
+    (err) => console.log(err)
+  )
