@@ -78,13 +78,16 @@ class MyPromise {
           }
 
           if (x instanceof MyPromise) {
+            // 如果返回值是promise对象，返回值为成功，新promise就是成功
+            // 如果返回值是promise对象，返回值为失败，新promise就是失败
             x.then(resolve, reject)
           } else {
+            // 如果返回值是非promise对象，新promise对象就是成功，值为此返回值
             resolve(x)
           }
         } catch (error) {
           reject(error)
-          throw new Error(err)
+          throw new Error(error)
         }
       }
 
@@ -100,16 +103,116 @@ class MyPromise {
 
     return thenPromise
   }
+
+  // all
+  all(promiseList) {
+    const result = []
+    let count = 0
+    return new MyPromise((resolve, reject) => {
+      const addData = (index, val) => {
+        result[index] = val
+        count++
+
+        if (count === promiseList.length) {
+          resolve(result)
+        }
+      }
+
+      promiseList.forEach((promise, index) => {
+        if (promise instanceof MyPromise) {
+          promise.then(
+            (res) => {
+              addData(index, res)
+            },
+            (err) => reject(err)
+          )
+        } else {
+          addData(index, promise)
+        }
+      })
+    })
+  }
+
+  // race
+  race(promiseList) {
+    return new MyPromise((resolve, reject) => {
+      promiseList.forEach((promise, index) => {
+        if (promise instanceof MyPromise) {
+          promise.then(
+            (res) => {
+              resolve(res)
+            },
+            (err) => {
+              reject(err)
+            }
+          )
+        } else {
+          resolve(promise)
+        }
+      })
+    })
+  }
+
+  allSettled(promiseList) {
+    const result = []
+    let count = 0
+    return new MyPromise((resolve, reject) => {
+      const addData = (state, val, i) => {
+        result[i] = {
+          state,
+          val
+        }
+        count++
+        if (count === promiseList.length) {
+          resolve(result)
+        }
+      }
+
+      promiseList.forEach((promise, index) => {
+        if (promise instanceof MyPromise) {
+          promise.then(
+            (res) => {
+              addData("fulfilled", res, index)
+            },
+            (err) => {
+              addData("rejected", err, index)
+            }
+          )
+        } else {
+          addData("fulfilled", promise, index)
+        }
+      })
+    })
+  }
+
+  any(promiseList) {
+    let count = 0
+    return new MyPromise((resolve, reject) => {
+      promiseList.forEach((promise) => {
+        promise.then(
+          (res) => {
+            resolve(res)
+          },
+          (err) => {
+            count++
+            if (count === promiseList.length) {
+              reject("fail")
+            }
+          }
+        )
+      })
+    })
+  }
 }
 
-const test1 = new MyPromise((resolve, reject) => {
-  resolve("success")
-})
-  .then(
-    (res) => console.log(res),
-    (err) => console.log(err)
-  )
-  .then(
-    (res) => console.log(res),
-    (err) => console.log(err)
-  )
+// all
+
+// const test1 = new MyPromise((resolve, reject) => {
+//   resolve(1)
+// })
+
+// const test2 = new MyPromise((resolve, reject) => {
+//   resolve(2)
+// })
+
+// Promise.all([test1, 2]).then((res) => console.log(res))
