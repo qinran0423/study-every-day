@@ -73,7 +73,7 @@ class MyPromise {
         try {
           const x = cb(this.PromiseResult)
 
-          if (x === thenPromise) {
+          if (x === thenPromise && x) {
             throw new Error("不能返回自身")
           }
 
